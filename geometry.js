@@ -176,12 +176,13 @@ function addForeheadPoints(landmarks) {
   // Sourcils : indices 17-26
   const eyebrowPoints = landmarks.slice(17, 27);
 
-  // Nez (bout du nez) : indice 30
-  const noseBridge = landmarks[27];
-
-  // Estimer la hauteur du front : ~75% de la distance sourcils → bout du nez
+  // Menton : indice 8 (point le plus bas du contour)
+  const chin = landmarks[8];
   const eyebrowCenter = centroid(eyebrowPoints);
-  const foreheadHeight = Math.abs(eyebrowCenter.y - noseBridge.y) * 0.75;
+
+  // Le front fait environ 40% de la hauteur sourcils → menton
+  const faceHeight = Math.abs(chin.y - eyebrowCenter.y);
+  const foreheadHeight = faceHeight * 0.4;
 
   // Créer des points extrapolés au-dessus de chaque point de sourcil
   const foreheadPoints = eyebrowPoints.map(p => ({
@@ -189,9 +190,9 @@ function addForeheadPoints(landmarks) {
     y: p.y - foreheadHeight
   }));
 
-  // Ajouter quelques points interpolés sur les côtés pour arrondir
-  const leftTemple = landmarks[0];   // Contour gauche du visage
-  const rightTemple = landmarks[16]; // Contour droit du visage
+  // Points aux tempes (côtés du front, légèrement plus bas)
+  const leftTemple = landmarks[0];
+  const rightTemple = landmarks[16];
   foreheadPoints.push(
     { x: leftTemple.x, y: eyebrowPoints[0].y - foreheadHeight * 0.5 },
     { x: rightTemple.x, y: eyebrowPoints[eyebrowPoints.length - 1].y - foreheadHeight * 0.5 }
