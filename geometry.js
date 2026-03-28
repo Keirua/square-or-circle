@@ -162,3 +162,40 @@ function boundingBox(points) {
   }
   return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
 }
+
+/**
+ * Extrapole des points de front à partir des landmarks.
+ * Les landmarks 17-21 (sourcil gauche) et 22-26 (sourcil droit) sont les plus hauts.
+ * On les projette vers le haut en utilisant la distance nez-sourcils comme estimation
+ * de la hauteur du front.
+ *
+ * @param {Array<{x: number, y: number}>} landmarks - Les 68 landmarks du visage
+ * @returns {Array<{x: number, y: number}>} Landmarks originaux + points de front extrapolés
+ */
+function addForeheadPoints(landmarks) {
+  // Sourcils : indices 17-26
+  const eyebrowPoints = landmarks.slice(17, 27);
+
+  // Nez (bout du nez) : indice 30
+  const noseBridge = landmarks[27];
+
+  // Estimer la hauteur du front : ~75% de la distance sourcils → bout du nez
+  const eyebrowCenter = centroid(eyebrowPoints);
+  const foreheadHeight = Math.abs(eyebrowCenter.y - noseBridge.y) * 0.75;
+
+  // Créer des points extrapolés au-dessus de chaque point de sourcil
+  const foreheadPoints = eyebrowPoints.map(p => ({
+    x: p.x,
+    y: p.y - foreheadHeight
+  }));
+
+  // Ajouter quelques points interpolés sur les côtés pour arrondir
+  const leftTemple = landmarks[0];   // Contour gauche du visage
+  const rightTemple = landmarks[16]; // Contour droit du visage
+  foreheadPoints.push(
+    { x: leftTemple.x, y: eyebrowPoints[0].y - foreheadHeight * 0.5 },
+    { x: rightTemple.x, y: eyebrowPoints[eyebrowPoints.length - 1].y - foreheadHeight * 0.5 }
+  );
+
+  return landmarks.concat(foreheadPoints);
+}

@@ -119,6 +119,24 @@
       justify-content: center;
     }
 
+    #forehead-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      user-select: none;
+      color: #c0d0e0;
+    }
+
+    #forehead-toggle input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #0096ff;
+    }
+
     #score-display {
       text-align: center;
       font-size: 1.3rem;
@@ -183,6 +201,9 @@
         <button id="btn-best-fit" class="btn-success">Meilleur ajustement</button>
         <button id="btn-clear" class="btn-danger">Effacer</button>
       </div>
+      <label id="forehead-toggle">
+        <input type="checkbox" id="chk-forehead"> Inclure le front
+      </label>
 
       <div id="score-display">
         Score de similarité : <span id="score-value">--</span>

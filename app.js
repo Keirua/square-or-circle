@@ -7,7 +7,8 @@ let state = {
   modelsLoaded: false,
   webcamActive: false,
   capturedImage: null,   // ImageData
-  landmarks: null,       // Array<{x, y}>
+  rawLandmarks: null,    // Array<{x, y}> — landmarks bruts de face-api.js
+  landmarks: null,       // Array<{x, y}> — landmarks utilisés (avec ou sans front)
   hull: null,            // Array<{x, y}>
   activeShape: null,     // { type, cx, cy, radius } ou { type, x, y, width, height }
   bestFitResults: null,  // [{ shape, color, score }]
@@ -17,7 +18,7 @@ let state = {
 // Éléments DOM
 let video, canvas, ctx;
 let btnCapture, btnRetake, btnCircle, btnRect, btnBestFit, btnClear;
-let shapeSection, scoreValue, statusBar, bestFitInfo;
+let shapeSection, scoreValue, statusBar, bestFitInfo, chkForehead;
 
 document.addEventListener('DOMContentLoaded', init);
 
@@ -35,6 +36,7 @@ async function init() {
   scoreValue = document.getElementById('score-value');
   statusBar = document.getElementById('status');
   bestFitInfo = document.getElementById('best-fit-info');
+  chkForehead = document.getElementById('chk-forehead');
 
   // Event listeners — boutons
   btnCapture.addEventListener('click', capturePhoto);
@@ -43,6 +45,7 @@ async function init() {
   btnRect.addEventListener('click', () => activateShape('rectangle'));
   btnBestFit.addEventListener('click', showBestFit);
   btnClear.addEventListener('click', clearShapes);
+  chkForehead.addEventListener('change', onForeheadToggle);
 
   // Event listeners — canvas (souris)
   canvas.addEventListener('mousedown', onPointerDown);
@@ -109,9 +112,9 @@ async function capturePhoto() {
   }
 
   // Extraire les landmarks
-  state.landmarks = detection.landmarks.positions.map(p => ({ x: p.x, y: p.y }));
-  state.hull = convexHull(state.landmarks);
+  state.rawLandmarks = detection.landmarks.positions.map(p => ({ x: p.x, y: p.y }));
   state.capturedImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  recomputeLandmarks();
 
   // Dessiner les landmarks
   drawLandmarks();
@@ -119,6 +122,26 @@ async function capturePhoto() {
   // Activer les contrôles
   shapeSection.style.display = 'flex';
   setStatus('Visage détecté ! Dessinez une forme sur le visage.');
+}
+
+function recomputeLandmarks() {
+  if (!state.rawLandmarks) return;
+  if (chkForehead.checked) {
+    state.landmarks = addForeheadPoints(state.rawLandmarks);
+  } else {
+    state.landmarks = state.rawLandmarks.slice();
+  }
+  state.hull = convexHull(state.landmarks);
+}
+
+function onForeheadToggle() {
+  recomputeLandmarks();
+  // Recalculer le best-fit si affiché
+  if (state.bestFitResults) {
+    showBestFit();
+    return;
+  }
+  updateDisplay();
 }
 
 function drawLandmarks() {
@@ -133,6 +156,7 @@ function drawLandmarks() {
 
 function retake() {
   state.activeShape = null;
+  state.rawLandmarks = null;
   state.landmarks = null;
   state.hull = null;
   state.capturedImage = null;
