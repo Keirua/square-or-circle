@@ -190,13 +190,44 @@ function addForeheadPoints(landmarks) {
     y: p.y - foreheadHeight
   }));
 
-  // Points aux tempes (côtés du front, légèrement plus bas)
-  const leftTemple = landmarks[0];
-  const rightTemple = landmarks[16];
-  foreheadPoints.push(
-    { x: leftTemple.x, y: eyebrowPoints[0].y - foreheadHeight * 0.5 },
-    { x: rightTemple.x, y: eyebrowPoints[eyebrowPoints.length - 1].y - foreheadHeight * 0.5 }
-  );
+  // Relier le contour du visage (landmarks 0-16) au front avec des points
+  // intermédiaires le long des tempes.
+  // Côté gauche : du contour (landmarks 0→1→2) vers le sourcil gauche (17)
+  // Côté droit : du contour (landmarks 16→15→14) vers le sourcil droit (26)
+  const leftSide = [landmarks[0], landmarks[1], landmarks[2]];
+  const rightSide = [landmarks[16], landmarks[15], landmarks[14]];
+  const leftEyebrow = eyebrowPoints[0];   // landmark 17
+  const rightEyebrow = eyebrowPoints[9];  // landmark 26
+  const leftTop = foreheadPoints[0];      // au-dessus du landmark 17
+  const rightTop = foreheadPoints[9];     // au-dessus du landmark 26
+
+  // Interpoler des points le long de la tempe gauche (contour → front)
+  for (const p of leftSide) {
+    // Point intermédiaire entre le contour et le haut du front
+    const t = 0.5;
+    foreheadPoints.push({
+      x: p.x + (leftTop.x - p.x) * t,
+      y: p.y + (leftTop.y - p.y) * t
+    });
+    // Point plus haut, proche du front
+    foreheadPoints.push({
+      x: p.x + (leftTop.x - p.x) * 0.8,
+      y: p.y + (leftTop.y - p.y) * 0.8
+    });
+  }
+
+  // Interpoler des points le long de la tempe droite (contour → front)
+  for (const p of rightSide) {
+    const t = 0.5;
+    foreheadPoints.push({
+      x: p.x + (rightTop.x - p.x) * t,
+      y: p.y + (rightTop.y - p.y) * t
+    });
+    foreheadPoints.push({
+      x: p.x + (rightTop.x - p.x) * 0.8,
+      y: p.y + (rightTop.y - p.y) * 0.8
+    });
+  }
 
   return landmarks.concat(foreheadPoints);
 }
