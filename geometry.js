@@ -190,6 +190,12 @@ function addForeheadPoints(landmarks) {
     y: p.y - foreheadHeight
   }));
 
+  // Point au sommet du crâne (légèrement plus haut que les autres)
+  foreheadPoints.push({
+    x: eyebrowCenter.x,
+    y: eyebrowCenter.y - foreheadHeight * 1.15
+  });
+
   // Relier le contour du visage (landmarks 0-16) au front avec des points
   // intermédiaires le long des tempes.
   // Côté gauche : du contour (landmarks 0→1→2) vers le sourcil gauche (17)
