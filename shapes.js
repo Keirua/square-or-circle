@@ -196,22 +196,21 @@ function drawShape(ctx, shape, color, dashed) {
   ctx.strokeStyle = color;
   ctx.lineWidth = 3;
 
+  if (dashed) {
+    ctx.fillStyle = color.replace('1)', '0.15)').replace('rgb', 'rgba');
+  } else {
+    ctx.fillStyle = 'transparent';
+  }
+
   if (shape.type === 'circle') {
     ctx.beginPath();
     ctx.arc(shape.cx, shape.cy, shape.radius, 0, Math.PI * 2);
-    if (dashed) {
-      ctx.fillStyle = color.replace('1)', '0.15)').replace('rgb', 'rgba');
-      ctx.fill();
-    }
-    ctx.stroke();
   } else {
     ctx.beginPath();
     ctx.rect(shape.x, shape.y, shape.width, shape.height);
-    if (dashed) {
-      ctx.fillStyle = color.replace('1)', '0.15)').replace('rgb', 'rgba');
-      ctx.fill();
-    }
-    ctx.stroke();
   }
+
+  if (dashed) ctx.fill();
+  ctx.stroke();
   ctx.restore();
 }
