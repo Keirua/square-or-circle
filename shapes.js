@@ -199,14 +199,18 @@ function drawShape(ctx, shape, color, dashed) {
   if (shape.type === 'circle') {
     ctx.beginPath();
     ctx.arc(shape.cx, shape.cy, shape.radius, 0, Math.PI * 2);
-    ctx.fillStyle = color.replace('1)', '0.15)').replace('rgb', 'rgba');
-    ctx.fill();
+    if (dashed) {
+      ctx.fillStyle = color.replace('1)', '0.15)').replace('rgb', 'rgba');
+      ctx.fill();
+    }
     ctx.stroke();
   } else {
     ctx.beginPath();
     ctx.rect(shape.x, shape.y, shape.width, shape.height);
-    ctx.fillStyle = color.replace('1)', '0.15)').replace('rgb', 'rgba');
-    ctx.fill();
+    if (dashed) {
+      ctx.fillStyle = color.replace('1)', '0.15)').replace('rgb', 'rgba');
+      ctx.fill();
+    }
     ctx.stroke();
   }
   ctx.restore();
